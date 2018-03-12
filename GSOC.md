@@ -16,6 +16,9 @@
     - [ Allow Updating Of Table Using Indices ](https://github.com/astropy/astropy/pull/6831) : Enhancement (Astropy Core)
     - [ Comparing FITS File With One In a Sub-directory ](https://github.com/astropy/astropy/pull/7085) : Bug Fix (Astropy Core)
     - [ Mapped J2000 ](https://github.com/astropy/regions/pull/157) : Bug Fix (Regions)
+    - [ fixed `contains` and made centre a 0D skycoord object ](https://github.com/astropy/regions/pull/159)
+    - [ added_functions_annulus ](https://github.com/astropy/regions/pull/161)
+    - [ docfix ](https://github.com/astropy/regions/pull/164) : a simple doc fix.
     
 #### 2.  Education 
 
@@ -47,10 +50,9 @@ I am very comfortable with Ubuntu 16.04 as my primary operating system.
 * Expected Graduation date: June 2020
 * Degree: Bachelor of Technology
         
-#### 5.  Interest In OpenAstronomy
+#### 5.  Interest In OpenAstronomy:
 
 ## PROJECT TITLE : CASA CRTF REGION FILE HANDLING
-#### 4.  Preliminary Research
 
 #### 5.  Project Abstract
 The regions package in astropy is the successor to pyregions and photoutils package which provides data structures and functionalities to handle astronomical regions.
@@ -71,23 +73,49 @@ After from the regular region shapes there are special definitons such as line, 
 - Provide documentation to all the features added.
 - Creating a test suite to ensure everything works as expected.
 
-#### DETAILED DESCRIPTION
+#### DETAILED DESCRIPTION:
 
-1. Implement new regions/annotations : The regions currently does not supports several regions such as centerbox, rotatedbox, vector, certain symbols.
-Annotations are also to be handled.Initially, i will discuss with the lead maintainers about the best possible way
-to design and implement the classes to make CASA regions feel as native as possible. 
+1. Creating a parser : The casa CRTF format has a different syntax style than DS9 regions.It is little more complicated to parse due to larger grammar rules. The also provides a large
+set of definitions which has values in a particular domain. The API needs to be made similar to that of the DS9 parser to be user friendly. The first task wiuld be to implement parser for 
+the regions and annotations. The second thing would be to parse the meta data i.e the definitions. I intend to make the following main classes :
+   1. `CRTFParser` : takes a region string and would contain CRTFShapeList which can be ultimately converted to region objects.It would contain several methods such as 
+   `parse_line` to parse single region and `parse_meta`.There would be appropriate storing the resultant meta as well as regions.In the process of converting into 
+   a CRTFShapeList there would be help of several helper classes. 
+        1. `CRTFRegionParser` : this class will help turning a line containing regions in CRTF format to CRTFShape object.
+        2. `CRTFShape` : this is a class which is used to represent a CRTF region so that it can be easily convertible to a regions object,kind of acts like an intermediate. 
+        3. `CRTFCoordinateParser` : helper class to parse string coordinates and transform into astropy.coordinate objects (mostly `SkyCoord` objects).
+   2. `CRTFShapeList` : It is a list of Shape.It would also contain `to_CRTFObject` method to convert into `CRTFObject`.
+   
+The first thing would be able to parse regions.Then, it should be able to parse meta data (definitions).
 
-2. Provide required functionalities to existing region classes: Some of the methods of the existing classes are yet to be 
-implemented and many of the methods lack proper documentation.The meta and the visual attributes are not properly documented and 
-may lead to confusion since the regions package would be handling both ds9 as well as CRTF. I will make sure that all the methods are implemented and
-properly documented that CRTF needs. i will also make sure that these are thoroughly tested.
+2. Implementing a Writer : We should be able to  convert the regions object into CRTF format strings and write them into files.
+The `writeDS9` method directly converts region lists into strings thus formatting the DS9 region file difficult.
+To represent CRTF region file we can create a `CRTFObject` and insert further global definitions , comments and tweak regions according to the user.
+The CRTFObject may be represented as list of sentences.(A single sentence represents a single region/annotation).
+The plan is to convert :
+    1. region list to `CRTFShapeList`. 
+    2. the `CRTFShapeList`can be converted to `CRTFObject` 
+    3. the `CRTFObject` can finally be converted to region strings.
 
-3.Creating a parser : The most important thing
+   We can add functions that wraps the first and second step.
+   We can also `writeCRTF` to convert regions directly to strings. 
+   The new thing (`CRTFObject`), will be heavily discussed with the community and will be implemented if seems necessary.
+
+3. Implement 2-D regions : there are several annotations described in the CRTF region format that are not currently implemented.
+    1. Vector : Probably should inherit Line shape.
+    2. Text : Probably should inherit point shape with an extra text attribute.
+    3. Symbols :this will also inherit point shape with an extra symbol attribute.
+    
+   The important thing for the above annotations is to represent them in plots by some plotting libraries such as matplotlib through `as_patch` methods.
+
+4. Adding missing functionalities to existing region classes : 
+
+5. Implementing 3-D regions : 
+  
 
 
-
-#### 6.  Timeline
-#### 7.  Schedule Availability
+#### 6.  Timeline:
+#### 7.  Schedule Availability:
     
     
 
